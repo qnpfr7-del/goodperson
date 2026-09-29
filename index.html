@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17375d">
+  <meta name="description" content="민원 서비스의 소관기관, 분야, 온라인 처리 여부, 처리기한과 수수료를 검색합니다.">
+  <title>민원 서비스 찾기</title>
+  <style>
+    :root { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; color: #17283e; background: #f5f7fa; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .topline { height: 6px; background: linear-gradient(90deg, #164e80, #36a0ac); }
+    main { max-width: 1160px; margin: 0 auto; padding: 42px 24px 80px; }
+    .eyebrow { color: #287583; font-size: .88rem; font-weight: 800; letter-spacing: .08em; margin: 0 0 8px; }
+    h1 { margin: 0; font-size: clamp(1.75rem, 4vw, 2.45rem); letter-spacing: -.055em; line-height: 1.25; }
+    .intro { color: #52647a; line-height: 1.65; margin: 10px 0 28px; }
+    .controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 240px); gap: 16px; padding: 22px; border: 1px solid #dce5ef; border-radius: 18px; background: #fff; box-shadow: 0 8px 26px rgba(25, 54, 85, .045); }
+    label { display: block; font-size: .91rem; font-weight: 750; margin-bottom: 8px; }
+    .search-wrap { position: relative; }
+    .search-wrap svg { position: absolute; top: 50%; left: 15px; transform: translateY(-50%); color: #65788d; pointer-events: none; }
+    input, select { width: 100%; height: 48px; border: 1px solid #b9c9d8; border-radius: 9px; background: #fff; color: #17283e; font: inherit; font-size: 1rem; }
+    input { padding: 0 15px 0 45px; }
+    select { padding: 0 12px; cursor: pointer; }
+    input::placeholder { color: #697a8d; opacity: 1; }
+    input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #48aab2; outline-offset: 2px; }
+    .result-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 28px 0 13px; }
+    h2 { margin: 0; font-size: 1.15rem; letter-spacing: -.025em; }
+    .count { color: #52647a; margin: 0; font-size: .95rem; }
+    .count strong { color: #116b7e; font-size: 1.15rem; }
+    .table-shell { overflow: hidden; border: 1px solid #dce5ef; border-radius: 16px; background: #fff; box-shadow: 0 8px 26px rgba(25, 54, 85, .04); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 16px 18px; color: #354a62; background: #eaf0f6; font-size: .87rem; font-weight: 800; white-space: nowrap; }
+    td { padding: 19px 18px; border-top: 1px solid #e8edf2; line-height: 1.5; font-size: .94rem; }
+    tbody tr:hover { background: #f8fbfd; }
+    td:first-child { font-weight: 750; color: #17375d; }
+    .badge { display: inline-flex; align-items: center; border-radius: 6px; padding: 4px 9px; background: #e7f5f4; color: #096b68; font-size: .82rem; font-weight: 750; white-space: nowrap; }
+    .badge.no { background: #f0f2f5; color: #5d6877; }
+    .empty { padding: 55px 20px; text-align: center; color: #52647a; line-height: 1.6; }
+    .empty strong { display: block; color: #17375d; font-size: 1.05rem; margin-bottom: 5px; }
+    .reset { margin-top: 16px; border: 1px solid #9ab6cc; border-radius: 8px; background: #fff; color: #164e80; padding: 10px 16px; font: inherit; font-weight: 750; cursor: pointer; }
+    .reset:hover { background: #edf5f8; }
+    @media (max-width: 760px) {
+      main { padding: 28px 16px 56px; }
+      .intro { margin-bottom: 22px; }
+      .controls { grid-template-columns: 1fr; padding: 18px; gap: 17px; }
+      .result-head { margin-top: 25px; }
+      table, tbody, tr, td { display: block; }
+      thead { display: none; }
+      tbody { padding: 0 16px; }
+      tr { padding: 17px 0; border-top: 1px solid #e8edf2; }
+      tr:first-child { border-top: 0; }
+      td { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: start; padding: 5px 0; border: 0; font-size: .94rem; overflow-wrap: anywhere; }
+      td::before { content: attr(data-label); color: #617187; font-weight: 500; }
+      td:first-child { display: block; font-size: 1.08rem; padding: 0 0 11px; }
+      td:first-child::before { display: none; }
+    }
+    @media (max-width: 360px) { td { grid-template-columns: 80px minmax(0, 1fr); gap: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="topline" aria-hidden="true"></div>
+  <main>
+    <p class="eyebrow">민원 서비스 안내</p>
+    <h1>민원 서비스 찾기</h1>
+    <p class="intro">서비스명을 검색하거나 민원분야를 선택해 필요한 정보를 확인하세요.</p>
+    <section class="controls" aria-label="서비스 검색 및 필터">
+      <div>
+        <label for="keyword">서비스명 검색</label>
+        <div class="search-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.2 16.2 5 5"/></svg>
+          <input id="keyword" type="search" placeholder="예: 주민등록, 여권" autocomplete="off">
+        </div>
+      </div>
+      <div>
+        <label for="category">민원분야</label>
+        <select id="category"><option value="">전체 분야</option></select>
+      </div>
+    </section>
+    <div class="result-head">
+      <h2>서비스 목록</h2>
+      <p class="count" role="status" aria-live="polite">현재 <strong id="count">22</strong>건 표시</p>
+    </div>
+    <div class="table-shell">
+      <table aria-label="민원 서비스 목록">
+        <thead><tr><th scope="col">서비스명</th><th scope="col">소관기관</th><th scope="col">민원분야</th><th scope="col">온라인 처리</th><th scope="col">처리기한</th><th scope="col">수수료</th></tr></thead>
+        <tbody id="results"></tbody>
+      </table>
+      <div id="empty" class="empty" hidden>
+        <strong>검색 결과가 없습니다.</strong>
+        검색어 또는 민원분야를 바꿔 보세요.<br>
+        <button class="reset" id="reset" type="button">검색 조건 초기화</button>
+      </div>
+    </div>
+  </main>
+  <script>
+    // 첨부된 민원서비스_목록.csv의 22개 행을 그대로 포함합니다.
+    const services = [{"서비스ID": "S001", "서비스명": "주민등록등본 발급", "소관기관": "주민센터", "민원분야": "주민등록", "온라인처리": "가능", "처리기한일": "7", "수수료": "500"}, {"서비스ID": "S002", "서비스명": "전입신고", "소관기관": "복지정책과", "민원분야": "주민등록", "온라인처리": "불가", "처리기한일": "1", "수수료": "0"}, {"서비스ID": "S003", "서비스명": "인감증명 발급", "소관기관": "복지정책과", "민원분야": "주민등록", "온라인처리": "가능", "처리기한일": "1", "수수료": "0"}, {"서비스ID": "S004", "서비스명": "주민등록증 재발급", "소관기관": "건축과", "민원분야": "주민등록", "온라인처리": "가능", "처리기한일": "0", "수수료": "0"}, {"서비스ID": "S005", "서비스명": "건축물대장 발급", "소관기관": "구청 민원봉사과", "민원분야": "건축", "온라인처리": "불가", "처리기한일": "0", "수수료": "1000"}, {"서비스ID": "S006", "서비스명": "건축허가 신청", "소관기관": "건축과", "민원분야": "건축", "온라인처리": "불가", "처리기한일": "1", "수수료": "2000"}, {"서비스ID": "S007", "서비스명": "용도변경 신고", "소관기관": "시청 민원과", "민원분야": "건축", "온라인처리": "불가", "처리기한일": "0", "수수료": "0"}, {"서비스ID": "S008", "서비스명": "지방세 납부확인서", "소관기관": "건축과", "민원분야": "세무", "온라인처리": "가능", "처리기한일": "1", "수수료": "1000"}, {"서비스ID": "S009", "서비스명": "취득세 신고", "소관기관": "교통행정과", "민원분야": "세무", "온라인처리": "가능", "처리기한일": "0", "수수료": "0"}, {"서비스ID": "S010", "서비스명": "재산세 조회", "소관기관": "교통행정과", "민원분야": "세무", "온라인처리": "가능", "처리기한일": "3", "수수료": "0"}, {"서비스ID": "S011", "서비스명": "기초연금 신청", "소관기관": "건축과", "민원분야": "복지", "온라인처리": "가능", "처리기한일": "7", "수수료": "500"}, {"서비스ID": "S012", "서비스명": "복지급여 조회", "소관기관": "시청 민원과", "민원분야": "복지", "온라인처리": "가능", "처리기한일": "14", "수수료": "5000"}, {"서비스ID": "S013", "서비스명": "장애인 등록", "소관기관": "주민센터", "민원분야": "복지", "온라인처리": "가능", "처리기한일": "5", "수수료": "0"}, {"서비스ID": "S014", "서비스명": "자동차 등록", "소관기관": "주민센터", "민원분야": "교통", "온라인처리": "가능", "처리기한일": "1", "수수료": "5000"}, {"서비스ID": "S015", "서비스명": "운전면허 갱신", "소관기관": "교통행정과", "민원분야": "교통", "온라인처리": "불가", "처리기한일": "1", "수수료": "0"}, {"서비스ID": "S016", "서비스명": "주정차 위반 조회", "소관기관": "주민센터", "민원분야": "교통", "온라인처리": "가능", "처리기한일": "7", "수수료": "1000"}, {"서비스ID": "S017", "서비스명": "배출시설 신고", "소관기관": "주민센터", "민원분야": "환경", "온라인처리": "가능", "처리기한일": "1", "수수료": "0"}, {"서비스ID": "S018", "서비스명": "폐기물 처리 신청", "소관기관": "시청 민원과", "민원분야": "환경", "온라인처리": "가능", "처리기한일": "14", "수수료": "5000"}, {"서비스ID": "S019", "서비스명": "식품영업 신고", "소관기관": "건축과", "민원분야": "위생", "온라인처리": "가능", "처리기한일": "3", "수수료": "2000"}, {"서비스ID": "S020", "서비스명": "위생업소 조회", "소관기관": "시청 민원과", "민원분야": "위생", "온라인처리": "불가", "처리기한일": "7", "수수료": "500"}, {"서비스ID": "S021", "서비스명": "여권 발급 신청", "소관기관": "건축과", "민원분야": "여권", "온라인처리": "가능", "처리기한일": "7", "수수료": "1000"}, {"서비스ID": "S022", "서비스명": "여권 재발급", "소관기관": "교통행정과", "민원분야": "여권", "온라인처리": "가능", "처리기한일": "1", "수수료": "1000"}];
+    const keyword = document.querySelector('#keyword');
+    const category = document.querySelector('#category');
+    const results = document.querySelector('#results');
+    const count = document.querySelector('#count');
+    const empty = document.querySelector('#empty');
+    const labels = ['서비스명', '소관기관', '민원분야', '온라인 처리', '처리기한', '수수료'];
+    const fields = ['서비스명', '소관기관', '민원분야', '온라인처리', '처리기한일', '수수료'];
+    const number = new Intl.NumberFormat('ko-KR');
+
+    [...new Set(services.map(row => row.민원분야))].forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = name;
+      category.append(option);
+    });
+
+    function displayValue(row, field) {
+      if (field === '처리기한일') return number.format(Number(row[field])) + '일';
+      if (field === '수수료') return Number(row[field]) === 0 ? '무료' : number.format(Number(row[field])) + '원';
+      return row[field];
+    }
+    function render() {
+      const query = keyword.value.trim().normalize('NFC').toLocaleLowerCase('ko-KR');
+      const selected = category.value;
+      const filtered = services.filter(row =>
+        row.서비스명.normalize('NFC').toLocaleLowerCase('ko-KR').includes(query) &&
+        (!selected || row.민원분야 === selected)
+      );
+      results.replaceChildren();
+      const fragment = document.createDocumentFragment();
+      for (const row of filtered) {
+        const tr = document.createElement('tr');
+        fields.forEach((field, index) => {
+          const td = document.createElement('td');
+          td.dataset.label = labels[index];
+          if (field === '온라인처리') {
+            const badge = document.createElement('span');
+            badge.className = 'badge' + (row[field] === '가능' ? '' : ' no');
+            badge.textContent = row[field];
+            td.append(badge);
+          } else {
+            td.textContent = displayValue(row, field);
+          }
+          tr.append(td);
+        });
+        fragment.append(tr);
+      }
+      results.append(fragment);
+      count.textContent = number.format(filtered.length);
+      empty.hidden = filtered.length !== 0;
+    }
+    keyword.addEventListener('input', render);
+    category.addEventListener('change', render);
+    document.querySelector('#reset').addEventListener('click', () => {
+      keyword.value = '';
+      category.value = '';
+      render();
+      keyword.focus();
+    });
+    render();
+  </script>
+</body>
+</html>
